@@ -23,7 +23,6 @@ def home():
     return "<h1>Project Setup</h1>"
 
 
-<<<<<<< HEAD
 @app.route('/patientLogin', methods=['GET', 'POST'])
 def patientlogin():
     if 'user' in session:
@@ -53,9 +52,6 @@ def patientlogin():
 
 
 @app.route('/patientRegister', methods=['GET', 'POST'])
-=======
-@app.route('/patientRegister' , methods=['GET','POST'])
->>>>>>> 89677af9b10abc9653449af8226cd047e0baeffb
 def patientRegister():
     if request.method == 'POST':
         name = request.form['name']
@@ -92,23 +88,11 @@ def patientRegister():
 
     return render_template('Register.html')
 
-
-<<<<<<< HEAD
-<< << << < HEAD
-== == == =
-
-
 @app.route('/logout')
 def logout():
     if 'user' in session:
         session.pop('user')
         return redirect('/')
     return redirect('/patientLogin')
-=======
-
->>>>>>> 89677af9b10abc9653449af8226cd047e0baeffb
-
-
->>>>>> > 49bc0f54ce9f260d6080c46ef6494a6fdcaad5f9
 
 app.run(debug=True, host='0.0.0.0')
