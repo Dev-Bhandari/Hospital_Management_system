@@ -44,7 +44,6 @@ def patientRegister():
 
         password = request.form['password']
         pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-        
 
         insert(mysql, "insert into patient(email, password, name, number, age) values('{}', '{}','{}','{}','{}')".format(
             email, pw_hash, name, number, age))
@@ -76,9 +75,7 @@ def patientlogin():
             uid = data['pid']
 
             if bcrypt.check_password_hash(password, passcode):
-                password = data['password']
-                uid = data['pid']
-
+                
                 session['user'] = uid
                 flash('Successfully logged in', 'good')
                 return redirect('/patientDashboard')
@@ -158,7 +155,7 @@ def stafflogin():
 @app.route('/logout')
 def logout():
 
-    if('user' in session.keys()):
+    if ('user' in session.keys()):
         if 'user' in session:
             session.pop('user')
             flash("Successfully logged out", 'good')
@@ -167,7 +164,7 @@ def logout():
             flash("Not logged in", 'bad')
             return redirect('/')
 
-    if('staff' in session.keys()):
+    if ('staff' in session.keys()):
         if 'staff' in session:
             session.pop('staff')
             flash("Successfully logged out", 'good')
@@ -175,7 +172,7 @@ def logout():
         if 'staff' not in session:
             flash("Not logged in", 'bad')
             return redirect('/')
-    
+
 
 @app.route('/staffDashboard')
 def staffDashboard():
@@ -184,12 +181,13 @@ def staffDashboard():
     #     return redirect("/staffLogin")
     session['staff'] = 1
     appointments = fetchall(
-        mysql, """select staff.sid, staff.name, desg, app_id, patient.pid, date_time, patient.name from staff inner join appointments, patient where staff.sid = appointments.sid = {} and patient.pid = appointments.pid and date_time >= '{}' order by date_time asc""".format(session['staff'],datetime.now()))
+        mysql, """select staff.sid, staff.name, desg, app_id, patient.pid, date_time, patient.name from staff inner join appointments, patient where staff.sid = appointments.sid = {} and patient.pid = appointments.pid and date_time >= '{}' order by date_time asc""".format(session['staff'], datetime.now()))
     print(appointments)
 
-    personal = fetchone(mysql, "select * from staff where sid = {}".format(session['staff']))
+    personal = fetchone(
+        mysql, "select * from staff where sid = {}".format(session['staff']))
 
-    pateint = fetchall(mysql,"select * from patient where sid = 1;")
+    pateint = fetchall(mysql, "select * from patient where sid = 1;")
 
     data = [appointments, personal, pateint]
 
@@ -198,14 +196,15 @@ def staffDashboard():
 
 @app.route('/patientDashboard')
 def patientDashboard():
-    if 'user'  not in session:
+    if 'user' not in session:
         flash('Not Logged in', 'bad')
         return redirect("/patientLogin")
     patientData = fetchone(
         mysql, "select * from patient where pid = {}".format(session['user']))
     vitalsData = fetchall(
         mysql, "select * from vitals where pid = {}".format(session['user']))
-    appointments = fetchall(mysql, """select patient.pid, patient.email, patient.name, patient.number, patient.age, app_id, staff.sid , date_time, staff.name  from patient inner join appointments, staff where patient.pid = appointments.pid = {} and appointments.sid = staff.sid order by date_time asc""".format(session['user']))
+    appointments = fetchall(
+        mysql, """select patient.pid, patient.email, patient.name, patient.number, patient.age, app_id, staff.sid , date_time, staff.name  from patient inner join appointments, staff where patient.pid = appointments.pid = {} and appointments.sid = staff.sid order by date_time asc""".format(session['user']))
     return render_template('patientDashboard.html', patientData=patientData, vitalsData=vitalsData, appointments=appointments)
 
 
@@ -273,7 +272,6 @@ def store():
     if "user" not in session:
         flash('Not Logged in', 'bad')
 
-
         return redirect("/patientLogin")
 
     items = fetchall(mysql, "select * from store")
@@ -302,7 +300,7 @@ def storeRedirect(itemid, qty):
     insert(mysql, "insert into cart(item_id, pid, pqty) values({},{},{})".format(
         itemid, session['user'], qty))
     flash('Added Successfully', 'good')
-    
+
     return redirect('/store')
 
 
@@ -335,9 +333,11 @@ def cart():
 def payment():
     return render_template('payment.html')
 
+
 @app.route("/patientStat/<pid>")
 def patientStat(pid):
-    data = fetchall(mysql,"select * from vitals where vitals.pid =  {}".format(pid))
+    data = fetchall(
+        mysql, "select * from vitals where vitals.pid =  {}".format(pid))
     pdata = fetchone(mysql, "select * from patient where pid ={}".format(pid))
     temps = []
     bp = []
@@ -346,18 +346,15 @@ def patientStat(pid):
     weight = []
     label = []
     for vital in data:
-        temps.append(int(vital['temp'])) 
+        temps.append(int(vital['temp']))
         bp.append(vital['blood_pressure'])
         resp.append(vital['resp_rate'])
-        spo2.append(vital['spo2']) 
+        spo2.append(vital['spo2'])
         weight.append(vital['weight'])
         date = vital['datetime']
-        
+
         label.append(date)
 
     # data = [bp, label]
 
     return render_template('Stats.html', data=data, pdata=pdata)
-
-
-app.run(debug=True, host='0.0.0.0')
